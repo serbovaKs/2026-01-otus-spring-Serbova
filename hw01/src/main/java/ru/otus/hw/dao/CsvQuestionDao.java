@@ -20,23 +20,18 @@ public class CsvQuestionDao implements QuestionDao {
 
     @Override
     public List<Question> findAll() {
-        List<QuestionDto> beans;
         var resource = getClass().getClassLoader().getResource(fileNameProvider.getTestFileName());
         try (Reader reader = Files.newBufferedReader(Paths.get(Objects.requireNonNull(resource).toURI()))) {
-            beans = new CsvToBeanBuilder(reader)
+            List<QuestionDto> beans = new CsvToBeanBuilder(reader)
                     .withType(QuestionDto.class)
                     .withSkipLines(1)
                     .withSeparator(';')
                     .build()
                     .parse();
-        } catch (URISyntaxException | IOException e) {
-            throw new QuestionReadException(e.getMessage());
-        }
-        // Использовать CsvToBean
-        // https://opencsv.sourceforge.net/#collection_based_bean_fields_one_to_many_mappings
-        // Использовать QuestionReadException
-        // Про ресурсы: https://mkyong.com/java/java-read-a-file-from-resources-folder/
+            return beans.stream().map(QuestionDto::toDomainObject).toList();
 
-        return beans.stream().map(QuestionDto::toDomainObject).toList();
+        } catch (URISyntaxException | IOException e) {
+            throw new QuestionReadException("Error read csv file", e);
+        }
     }
 }

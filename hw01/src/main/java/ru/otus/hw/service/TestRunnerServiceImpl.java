@@ -7,8 +7,14 @@ public class TestRunnerServiceImpl implements TestRunnerService {
 
     private final TestService testService;
 
+    private final IOService iOService;
+
     @Override
     public void run() {
-        testService.executeTest();
+        try {
+            testService.executeTest();
+        } catch (Exception e) {
+            iOService.printLine("Error execute test");
+        }
     }
 }

@@ -1,7 +1,7 @@
+package ru.otus.hw.service;
+
 import org.junit.jupiter.api.Test;
 import ru.otus.hw.dao.QuestionDao;
-import ru.otus.hw.service.IOService;
-import ru.otus.hw.service.TestServiceImpl;
 
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;

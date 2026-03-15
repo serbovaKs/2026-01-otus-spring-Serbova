@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.otus.hw.dao.QuestionDao;
 import ru.otus.hw.domain.Answer;
+import ru.otus.hw.domain.Question;
 import ru.otus.hw.domain.Student;
 import ru.otus.hw.domain.TestResult;
 
@@ -21,9 +22,12 @@ public class TestServiceImpl implements TestService {
     public TestResult executeTestFor(Student student) {
         ioService.printLine("");
         ioService.printFormattedLine("Please answer the questions below%n");
-        var questions = questionDao.findAll();
-        var testResult = new TestResult(student);
 
+        return createTestResult(questionDao.findAll(), student);
+    }
+
+    private TestResult createTestResult(List<Question> questions, Student student) {
+        var testResult = new TestResult(student);
         for (var question: questions) {
             var isAnswerValid = false;
             ioService.printFormattedLine(question.text());
@@ -43,6 +47,6 @@ public class TestServiceImpl implements TestService {
             isAnswerValid = numCorrectAnswer == numAnswer;
             testResult.applyAnswer(question, isAnswerValid);
         }
-        return testResult;
+        return  testResult;
     }
 }

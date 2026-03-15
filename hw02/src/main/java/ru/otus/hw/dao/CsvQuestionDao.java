@@ -25,7 +25,7 @@ public class CsvQuestionDao implements QuestionDao {
     public List<Question> findAll() {
         var resource = getClass().getClassLoader().getResource(appProperties.getTestFileName());
         try (Reader reader = Files.newBufferedReader(Paths.get(Objects.requireNonNull(resource).toURI()))) {
-            List<QuestionDto> beans = new CsvToBeanBuilder(reader)
+            var beans = new CsvToBeanBuilder<QuestionDto>(reader)
                     .withType(QuestionDto.class)
                     .withSkipLines(1)
                     .withSeparator(';')

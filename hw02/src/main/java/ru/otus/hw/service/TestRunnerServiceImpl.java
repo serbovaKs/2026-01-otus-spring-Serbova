@@ -13,7 +13,7 @@ public class TestRunnerServiceImpl implements TestRunnerService {
 
     private final ResultService resultService;
 
-    private final StreamsIOService streamsIOService;
+    private final IOService ioService;
 
     @Override
     public void run() {
@@ -22,7 +22,7 @@ public class TestRunnerServiceImpl implements TestRunnerService {
             var testResult = testService.executeTestFor(student);
             resultService.showResult(testResult);
         } catch (Exception e) {
-            streamsIOService.printLine("Error execute test");
+            ioService.printLine("Error execute test");
         }
     }
 }

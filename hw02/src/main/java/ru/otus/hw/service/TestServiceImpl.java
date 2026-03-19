@@ -23,23 +23,18 @@ public class TestServiceImpl implements TestService {
         ioService.printLine("");
         ioService.printFormattedLine("Please answer the questions below%n");
 
-        return createTestResult(questionDao.findAll(), student);
+        return executeTest(questionDao.findAll(), student);
     }
 
-    private TestResult createTestResult(List<Question> questions, Student student) {
+    private TestResult executeTest(List<Question> questions, Student student) {
         var testResult = new TestResult(student);
+        boolean isAnswerValid;
+        int numAnswer;
+        int numCorrectAnswer;
         for (var question: questions) {
-            var isAnswerValid = false;
             ioService.printFormattedLine(question.text());
-            List<Answer> answers = question.answers();
-            int numCorrectAnswer = 0;
-            for (int index = 0; index < answers.size(); index++) {
-                ioService.printLine("%s - %s".formatted(index + 1, answers.get(index).text()));
-                if (answers.get(index).isCorrect()) {
-                    numCorrectAnswer = index + 1;
-                }
-            }
-            int numAnswer = ioService.readIntForRange(
+            numCorrectAnswer = getNumCorrectAnswer(question.answers());
+            numAnswer = ioService.readIntForRange(
                     1,
                     question.answers().size(),
                     "Selected answer number is outside the allowed range"
@@ -48,5 +43,16 @@ public class TestServiceImpl implements TestService {
             testResult.applyAnswer(question, isAnswerValid);
         }
         return  testResult;
+    }
+
+    private int getNumCorrectAnswer(List<Answer> answers) {
+        var numCorrectAnswer = 0;
+        for (int index = 0; index < answers.size(); index++) {
+            ioService.printLine("%s - %s".formatted(index + 1, answers.get(index).text()));
+            if (answers.get(index).isCorrect()) {
+                numCorrectAnswer = index + 1;
+            }
+        }
+        return numCorrectAnswer;
     }
 }

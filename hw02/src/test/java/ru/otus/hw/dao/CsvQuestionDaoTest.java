@@ -2,7 +2,6 @@ package ru.otus.hw.dao;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.springframework.context.annotation.PropertySource;
 import ru.otus.hw.config.AppProperties;
 import ru.otus.hw.domain.Question;
 import java.util.List;
@@ -10,7 +9,6 @@ import java.util.List;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-@PropertySource("classpath:application.properties")
 public class CsvQuestionDaoTest {
 
 

@@ -28,18 +28,15 @@ public class TestServiceImpl implements TestService {
 
     private TestResult executeTest(List<Question> questions, Student student) {
         var testResult = new TestResult(student);
-        boolean isAnswerValid;
-        int numAnswer;
-        int numCorrectAnswer;
         for (var question: questions) {
             ioService.printFormattedLine(question.text());
-            numCorrectAnswer = getNumCorrectAnswer(question.answers());
-            numAnswer = ioService.readIntForRange(
+            int numCorrectAnswer = getNumCorrectAnswer(question.answers());
+            int numAnswer = ioService.readIntForRange(
                     1,
                     question.answers().size(),
                     "Selected answer number is outside the allowed range"
             );
-            isAnswerValid = numCorrectAnswer == numAnswer;
+            boolean isAnswerValid = numCorrectAnswer == numAnswer;
             testResult.applyAnswer(question, isAnswerValid);
         }
         return  testResult;

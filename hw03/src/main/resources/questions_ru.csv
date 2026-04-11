@@ -2,3 +2,5 @@
 Есть ли жизнь на Марсе?;Это науке пока не известно%true|Конечно. Красные (НЛО) это с Марса. А зеленые (НЛО) с Венеры%false|Точно нет%false
 Как нужно загружать ресурс из jar в Java?;ClassLoader#geResourceAsStream или ClassPathResource#getInputStream%true|ClassLoader#geResource#getFile + FileReader%false|Wingardium Leviosa%false
 Какой предпочтительный способ реакции на исключения?;@SneakyThrow%false|e.printStackTrace()%false|Проброс дальше с предварительным оборачиванием в бизнес-исключение (например, QuestionReadException)%true|Игнорирование исключения%false
+Какова область видимости бина по умолчанию в Spring Framework?; Singleton%true|Factory%false|Builder%false
+Что такое Spring Boot?; Project%true|Framework%false|Библиотека Spring%false|

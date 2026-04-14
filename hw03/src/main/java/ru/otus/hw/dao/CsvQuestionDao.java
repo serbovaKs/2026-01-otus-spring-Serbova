@@ -3,28 +3,27 @@ package ru.otus.hw.dao;
 import com.opencsv.bean.CsvToBeanBuilder;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import ru.otus.hw.config.AppProperties;
+import ru.otus.hw.config.TestFileNameProvider;
 import ru.otus.hw.dao.dto.QuestionDto;
 import ru.otus.hw.domain.Question;
 import ru.otus.hw.exceptions.QuestionReadException;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.Reader;
-import java.net.URISyntaxException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.List;
 import java.util.Objects;
 
-@Component
 @RequiredArgsConstructor
+@Component
 public class CsvQuestionDao implements QuestionDao {
-    private final AppProperties appProperties;
+    private final TestFileNameProvider testFileNameProvider;
 
     @Override
     public List<Question> findAll() {
-        var resource = getClass().getClassLoader().getResource(appProperties.getTestFileName());
-        try (Reader reader = Files.newBufferedReader(Paths.get(Objects.requireNonNull(resource).toURI()))) {
+        try (var inputStream = getClass().getClassLoader().getResourceAsStream(testFileNameProvider.getTestFileName())) {
+            Reader reader = new BufferedReader(new InputStreamReader(Objects.requireNonNull(inputStream)));
             var beans = new CsvToBeanBuilder<QuestionDto>(reader)
                     .withType(QuestionDto.class)
                     .withSkipLines(1)
@@ -32,7 +31,7 @@ public class CsvQuestionDao implements QuestionDao {
                     .build()
                     .parse();
             return beans.stream().map(QuestionDto::toDomainObject).toList();
-        } catch (URISyntaxException | IOException e) {
+        } catch (IOException e) {
             throw new QuestionReadException("Error read csv file", e);
         }
     }

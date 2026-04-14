@@ -13,10 +13,16 @@ public class TestRunnerServiceImpl implements TestRunnerService {
 
     private final ResultService resultService;
 
+    private final StreamsIOService ioService;
+
     @Override
     public void run() {
-        var student = studentService.determineCurrentStudent();
-        var testResult = testService.executeTestFor(student);
-        resultService.showResult(testResult);
+        try {
+            var student = studentService.determineCurrentStudent();
+            var testResult = testService.executeTestFor(student);
+            resultService.showResult(testResult);
+        } catch (Exception e) {
+            ioService.printLine("Error execute test");
+        }
     }
 }

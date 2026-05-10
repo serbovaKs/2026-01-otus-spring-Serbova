@@ -1,16 +1,13 @@
 package ru.otus.hw.repositories;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcOperations;
-import org.springframework.jdbc.core.PreparedStatementCreatorFactory;
 import org.springframework.jdbc.core.RowMapper;
-import org.springframework.jdbc.core.SqlParameter;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcOperations;
-import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.stereotype.Repository;
-import ru.otus.hw.converters.BookConverter;
 import ru.otus.hw.exceptions.EntityNotFoundException;
 import ru.otus.hw.models.Author;
 import ru.otus.hw.models.Book;
@@ -18,7 +15,6 @@ import ru.otus.hw.models.Genre;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Types;
 import java.util.*;
 
 @Repository
@@ -31,15 +27,19 @@ public class JdbcBookRepository implements BookRepository {
     @Override
     public Optional<Book> findById(long id) {
         Map<String, Object> params = Collections.singletonMap("id", id);
-        return Optional.ofNullable(namedParameterJdbcOperations.queryForObject(
-            "select books.id, title, author_id, authors.full_name as author_full_name, genre_id, genres.name as genre_name " +
-                    "from books " +
-                    "join authors on authors.id = books.author_id " +
-                    "join genres on genres.id = books.genre_id " +
-                    "where books.id = :id",
-            params,
-            new BookRowMapper()
-        ));
+        try {
+            return Optional.ofNullable(namedParameterJdbcOperations.queryForObject(
+                "select books.id, title, author_id, authors.full_name as author_full_name, genre_id, genres.name as genre_name " +
+                        "from books " +
+                        "join authors on authors.id = books.author_id " +
+                        "join genres on genres.id = books.genre_id " +
+                        "where books.id = :id",
+                params,
+                new BookRowMapper()
+            ));
+        } catch (EmptyResultDataAccessException exception) {
+            return Optional.empty();
+        }
     }
 
     @Override

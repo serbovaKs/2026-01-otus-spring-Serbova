@@ -32,13 +32,13 @@ public class JdbcBookRepository implements BookRepository {
         Map<String, Object> params = Collections.singletonMap("id", id);
         try {
             return Optional.ofNullable(namedParameterJdbcOperations.queryForObject(
-                    "select books.id, title, author_id, authors.full_name as author_full_name, genre_id, genres.name as genre_name " +
-                            "from books " +
-                            "join authors on authors.id = books.author_id " +
-                            "join genres on genres.id = books.genre_id " +
-                            "where books.id = :id",
-                    params,
-                    new BookRowMapper()
+                "select books.id, title, author_id, authors.full_name as author_full_name, genre_id, genres.name as genre_name " +
+                        "from books " +
+                        "join authors on authors.id = books.author_id " +
+                        "join genres on genres.id = books.genre_id " +
+                        "where books.id = :id",
+                params,
+                new BookRowMapper()
             ));
         } catch (EmptyResultDataAccessException exception) {
             return Optional.empty();

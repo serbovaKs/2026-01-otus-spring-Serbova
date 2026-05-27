@@ -19,11 +19,11 @@ public class CommentRepositoryJpa implements CommentRepository {
     private final EntityManager em;
 
     @Override
-    public List<Comment> findByBookId(long id) {
+    public List<Comment> findByBookId(long bookId) {
         TypedQuery<Comment> query = em.createQuery(
-                "select comments.id, comments.text from comments where comments.book_id = %d".formatted(id),
+                "select comments.id, comments.text from comments where comments.book_id = :bookId",
                 Comment.class
-        );
+        ).setParameter("bookId", bookId);
         return query.getResultList();
     }
 

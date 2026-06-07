@@ -3,27 +3,22 @@ package ru.otus.hw.repositories;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.TypedQuery;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
-import ru.otus.hw.models.Author;
 import ru.otus.hw.models.Comment;
-
 import java.util.List;
 import java.util.Optional;
 
-
 @Repository
-@RequiredArgsConstructor
-public class CommentRepositoryJpa implements CommentRepository {
+public class JpaCommentRepository implements CommentRepository {
     @PersistenceContext
-    private final EntityManager em;
+    private EntityManager em;
 
     @Override
     public List<Comment> findByBookId(long bookId) {
         TypedQuery<Comment> query = em.createQuery(
-                "select comments.id, comments.text from comments where comments.book_id = :bookId",
-                Comment.class
-        ).setParameter("bookId", bookId);
+                "select distinct c from Comment c where c.book.id = :bookId",
+                    Comment.class
+                ).setParameter("bookId", bookId);
         return query.getResultList();
     }
 
@@ -42,7 +37,7 @@ public class CommentRepositoryJpa implements CommentRepository {
     }
 
     @Override
-    public void delete(Comment comment) {
-        em.remove(comment);
+    public void deleteById(long id) {
+        em.remove(em.find(Comment.class, id));
     }
 }

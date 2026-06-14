@@ -22,10 +22,11 @@ import org.hibernate.annotations.FetchMode;
 @AllArgsConstructor
 @Entity
 @Table(name = "books")
-@NamedEntityGraph(name = "book-genre-entity-graph", attributeNodes = {@NamedAttributeNode("genre")})
-@NamedEntityGraph(name = "book-author-entity-graph", attributeNodes = {@NamedAttributeNode("author")})
+@NamedEntityGraph(
+        name = "book-genre-author-entity-graph",
+        attributeNodes = {@NamedAttributeNode("genre"), @NamedAttributeNode("author")}
+)
 public class Book {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
@@ -42,5 +43,4 @@ public class Book {
     @ManyToOne(targetEntity = Genre.class, fetch = FetchType.LAZY)
     @JoinColumn(name = "genre_id")
     private Genre genre;
-
 }

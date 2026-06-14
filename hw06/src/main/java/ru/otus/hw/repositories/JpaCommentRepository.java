@@ -3,15 +3,17 @@ package ru.otus.hw.repositories;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.TypedQuery;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import ru.otus.hw.models.Comment;
 import java.util.List;
 import java.util.Optional;
 
 @Repository
+@RequiredArgsConstructor
 public class JpaCommentRepository implements CommentRepository {
     @PersistenceContext
-    private EntityManager em;
+    private final EntityManager em;
 
     @Override
     public List<Comment> findByBookId(long bookId) {

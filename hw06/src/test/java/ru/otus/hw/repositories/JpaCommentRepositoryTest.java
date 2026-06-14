@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import ru.otus.hw.models.Author;
 import ru.otus.hw.models.Book;
 import ru.otus.hw.models.Comment;
@@ -16,6 +17,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @DisplayName("Репозиторий на основе Jpa для работы с комментариями")
 @DataJpaTest
 @Import({JpaCommentRepository.class})
+@EnableJpaRepositories(enableDefaultTransactions = false)
 class JpaCommentRepositoryTest {
 
     @Autowired
@@ -49,10 +51,7 @@ class JpaCommentRepositoryTest {
                 .matches(book -> book.getId() > 0)
                 .usingRecursiveComparison().ignoringExpectedNullFields().isEqualTo(expectedComment);
 
-        assertThat(repositoryJpa.findById(returnedComment.getId()))
-                .isPresent()
-                .get()
-                .isEqualTo(returnedComment);
+        assertThat(em.find(Comment.class, returnedComment.getId())).isEqualTo(returnedComment);
     }
 
     @DisplayName("должен сохранять измененный комментарий")
@@ -61,27 +60,23 @@ class JpaCommentRepositoryTest {
         var expectedComment = new Comment(1, "Comment_1",
                 new Book(1, "BookTitle_1", new Author(1, "Author_1"), new Genre(1, "Genre_1")));
 
-        assertThat(repositoryJpa.findById(expectedComment.getId()))
-                .isPresent()
-                .get()
-                .isNotEqualTo(expectedComment);
+        var returnedComment = em.find(Comment.class, expectedComment.getId());
 
-        var returnedComment = repositoryJpa.save(expectedComment);
-        assertThat(returnedComment).isNotNull()
+        assertThat(returnedComment).isNotEqualTo(expectedComment);
+
+        var savedComment = repositoryJpa.save(expectedComment);
+        assertThat(savedComment).isNotNull()
                 .matches(book -> book.getId() > 0)
                 .usingRecursiveComparison().ignoringExpectedNullFields().isEqualTo(expectedComment);
 
-        assertThat(repositoryJpa.findById(returnedComment.getId()))
-                .isPresent()
-                .get()
-                .isEqualTo(returnedComment);
+        assertThat(returnedComment).isEqualTo(savedComment);
     }
 
     @DisplayName("должен удалять комментарий по id ")
     @Test
     void shouldDeleteBook() {
-        assertThat(repositoryJpa.findById(1L)).isPresent();
+        assertThat(em.find(Comment.class, 1L)).isNotNull();
         repositoryJpa.deleteById(1L);
-        assertThat(repositoryJpa.findById(1L)).isEmpty();
+        assertThat(em.find(Comment.class, 1L)).isNull();
     }
 }

@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import ru.otus.hw.converters.AuthorConverter;
 import ru.otus.hw.converters.BookConverter;
 import ru.otus.hw.converters.GenreConverter;
@@ -20,6 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 @DataJpaTest
 @Import({BookServiceImpl.class, JpaBookRepository.class, JpaAuthorRepository.class, JpaGenreRepository.class,
 AuthorServiceImpl.class, GenreServiceImpl.class, BookConverter.class, AuthorConverter.class, GenreConverter.class})
+@EnableJpaRepositories(enableDefaultTransactions = false)
 public class BookServiceTest {
     @Autowired
     private BookService bookService;

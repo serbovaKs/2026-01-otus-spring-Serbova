@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Test;import org.springframework.beans.factory.annot
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.context.annotation.Import;
-import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import ru.otus.hw.models.Genre;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -13,7 +12,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 @DisplayName("Репозиторий на основе Jpa для работы с книгами ")
 @DataJpaTest
 @Import({JpaGenreRepository.class})
-@EnableJpaRepositories(enableDefaultTransactions = false)
 public class JpaGenreRepositoryTest {
     @Autowired
     private JpaGenreRepository repositoryJpa;

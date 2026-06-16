@@ -5,7 +5,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import ru.otus.hw.converters.CommentConverter;
 import ru.otus.hw.repositories.JpaBookRepository;
 import ru.otus.hw.repositories.JpaCommentRepository;
@@ -18,7 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 @DisplayName("Сервис для работы с комментариями")
 @DataJpaTest
 @Import({CommentServiceImpl.class, JpaBookRepository.class, JpaCommentRepository.class, CommentConverter.class})
-@EnableJpaRepositories(enableDefaultTransactions = false)
+@Transactional(propagation = Propagation.NEVER)
 public class CommentServiceTest {
     @Autowired
     private CommentService service;

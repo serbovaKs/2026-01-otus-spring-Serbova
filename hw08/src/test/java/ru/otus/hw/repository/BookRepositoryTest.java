@@ -2,12 +2,13 @@ package ru.otus.hw.repository;
 
 import com.mongodb.BasicDBObjectBuilder;
 import com.mongodb.DBObject;
+import org.bson.types.ObjectId;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
 import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.test.context.event.annotation.AfterTestMethod;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import ru.otus.hw.models.Author;
 import ru.otus.hw.models.Book;
@@ -22,36 +23,38 @@ public class BookRepositoryTest {
     @Autowired
     private MongoTemplate mongoTemplate;
 
-    @AfterTestMethod
-    void afterLoadDb() {
+    private static String authorId;
+    private static String genreId;
+    private static String bookId;
+
+    @BeforeAll
+    public static void beforeLoadDb(@Autowired MongoTemplate mongoTemplate) {
+        DBObject objectToSaveAuthor = BasicDBObjectBuilder.start()
+                .add("_id", ObjectId.get())
+                .add("fullName", "author_1")
+                .get();
+        authorId = mongoTemplate.save(objectToSaveAuthor, "author").get("_id").toString();
+
+        DBObject objectToSaveGenre = BasicDBObjectBuilder.start()
+                .add("_id", ObjectId.get())
+                .add("name", "genre_1")
+                .get();
+        genreId = mongoTemplate.save(objectToSaveGenre, "genre").get("_id").toString();
+
         DBObject objectToSave = BasicDBObjectBuilder.start()
-                .add("_id", 1)
-                .add("fullName", "Author_1")
+                .add("_id", ObjectId.get())
+                .add("title", "book_1")
+                .add("author_id", authorId)
+                .add("genre_id", genreId)
                 .get();
-        mongoTemplate.save(objectToSave, "author");
-
-        objectToSave = BasicDBObjectBuilder.start()
-                .add("_id", 1)
-                .add("name", "Genre_1")
-                .get();
-        mongoTemplate.save(objectToSave, "Genre");
-
-        objectToSave = BasicDBObjectBuilder.start()
-                .add("_id", 1)
-                .add("title", "Book_1")
-                .add("author_id", 1)
-                .add("genre_id", 1)
-                .get();
-        mongoTemplate.save(objectToSave, "book");
+        bookId = mongoTemplate.save(objectToSave, "book").get("_id").toString();
     }
 
     @Test
     public void testFindById() {
-        var result = mongoTemplate.findById(1, Book.class);
+        var result = mongoTemplate.findById(bookId, Book.class);
         assertNotNull(result);
-        assertEquals("Book_1", result.getTitle());
-        assertEquals(1, result.getAuthor().getId());
-        assertEquals(1, result.getGenre().getId());
+        assertEquals("book_1", result.getTitle());
     }
 
     @Test
@@ -64,17 +67,18 @@ public class BookRepositoryTest {
     @Test
     public void testSave() {
         var resultSave = mongoTemplate.save(
-                new Book(2, "Book_21", new Author(1, "Author_1"), new Genre(1, "Genre_1"))
+                new Book("book_21", new Author(authorId,"author_1"), new Genre(genreId, "genre_1"))
         );
         assertDoesNotThrow(() -> resultSave);
-        assertEquals(mongoTemplate.findById(2, Book.class).getTitle(), resultSave.getTitle());
+        assertEquals("book_21", mongoTemplate.findById(resultSave.getId(), Book.class).getTitle());
     }
 
     @Test
     public void testDelete() {
-        assertDoesNotThrow(() -> mongoTemplate.remove(
-                new Book(1, "Book_1", new Author(1, "Author_1"), new Genre(1, "Genre_1"))
-        ).getDeletedCount());
-        assertNull(mongoTemplate.findById(1, Book.class));
+        var result = mongoTemplate.remove(
+                new Book(bookId, "book_1", new Author(authorId, "author_1"), new Genre(genreId, "genre_1"))
+        );
+        assertDoesNotThrow(() -> result);
+        assertEquals(1L, result.getDeletedCount());
     }
 }

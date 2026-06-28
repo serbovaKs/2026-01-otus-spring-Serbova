@@ -1,17 +1,25 @@
 package ru.otus.hw.models;
 
-import lombok.*;
-import org.springframework.data.annotation.Id;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.FieldType;
+import org.springframework.data.mongodb.core.mapping.MongoId;
 
 @Getter
 @Setter
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 @Document
 public class Author {
-    @Id
-    private long id;
+    @MongoId(FieldType.OBJECT_ID)
+    private String id;
 
     private String fullName;
+
+    public Author(String fullName) {
+        this.fullName = fullName;
+    }
 }

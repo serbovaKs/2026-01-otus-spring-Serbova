@@ -1,14 +1,8 @@
 spring:
   data:
     mongodb:
-      authentication-database: admin
-      username: root
-      password: root
-      database: user_db
+      database: library
       port: 27017
-      host: localhost
-  main:
-    allow-bean-definition-overriding : true
 
 
 de:

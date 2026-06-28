@@ -1,14 +1,8 @@
 spring:
   data:
     mongodb:
-      authentication-database: admin
-      username: root
-      password: root
-      database: user_db
+      database: library-test
       port: 27017
-      host: localhost
-  main:
-    allow-bean-definition-overriding : true
 
 
 de:
@@ -19,7 +13,7 @@ de:
 
 
 mongock:
-  runner-type: "InitializingBean"
+  runner-type: "ApplicationRunner" #"InitializingBean"
   change-logs-scan-package:
     - ru.otus.hw.mongock.changelog
   mongo-db:

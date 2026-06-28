@@ -5,6 +5,6 @@ import ru.otus.hw.models.Genre;
 
 import java.util.List;
 
-public interface GenreRepository extends MongoRepository<Genre, Long> {
+public interface GenreRepository extends MongoRepository<Genre, String> {
     List<Genre> findAll();
 }

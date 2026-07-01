@@ -5,23 +5,24 @@ import com.mongodb.DBObject;
 import org.bson.types.ObjectId;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
 import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 import ru.otus.hw.models.Author;
 import ru.otus.hw.models.Book;
 import ru.otus.hw.models.Genre;
+import ru.otus.hw.repositories.BookRepository;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 
 @DataMongoTest
-@ExtendWith(SpringExtension.class)
 public class BookRepositoryTest {
     @Autowired
     private MongoTemplate mongoTemplate;
+
+    @Autowired
+    private BookRepository bookRepository;
 
     private static String authorId;
     private static String genreId;
@@ -52,33 +53,36 @@ public class BookRepositoryTest {
 
     @Test
     public void testFindById() {
-        var result = mongoTemplate.findById(bookId, Book.class);
-        assertNotNull(result);
-        assertEquals("book_1", result.getTitle());
+        var result = bookRepository.findById(bookId);
+        assertTrue(result.isPresent());
+        assertEquals(mongoTemplate.findById(bookId, Book.class).getTitle(), result.get().getTitle());
     }
 
     @Test
     public void testFindAll() {
-        var result = mongoTemplate.findAll(Book.class);
+        var result = bookRepository.findAll();
         assertNotNull(result);
         assertFalse(result.isEmpty());
     }
 
     @Test
     public void testSave() {
-        var resultSave = mongoTemplate.save(
+        var resultSave = bookRepository.save(
                 new Book("book_21", new Author(authorId,"author_1"), new Genre(genreId, "genre_1"))
         );
         assertDoesNotThrow(() -> resultSave);
-        assertEquals("book_21", mongoTemplate.findById(resultSave.getId(), Book.class).getTitle());
+        assertEquals(resultSave.getTitle(), mongoTemplate.findById(resultSave.getId(), Book.class).getTitle());
     }
 
     @Test
     public void testDelete() {
-        var result = mongoTemplate.remove(
+        assertDoesNotThrow(() -> bookRepository.delete(
                 new Book(bookId, "book_1", new Author(authorId, "author_1"), new Genre(genreId, "genre_1"))
-        );
-        assertDoesNotThrow(() -> result);
-        assertEquals(1L, result.getDeletedCount());
+        ));
+    }
+
+    @Test
+    public void testDeleteById() {
+        assertDoesNotThrow(() -> bookRepository.deleteById(bookId));
     }
 }

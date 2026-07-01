@@ -35,12 +35,18 @@ public class BookServiceImpl implements BookService {
 
     @Override
     public Book insert(String title, String authorId, String genreId) {
-        return save(title, authorId, genreId);
+        return save(null, title, authorId, genreId);
     }
 
     @Override
     public Book update(String id, String title, String authorId, String genreId) {
-        return save(title, authorId, genreId);
+        var resultSaveBook = save(id, title, authorId, genreId);
+        commentRepository.findByBookId(id).forEach(comment -> {
+            comment.setBook(resultSaveBook);
+            commentRepository.save(comment);
+        });
+
+        return resultSaveBook;
     }
 
     @Override
@@ -49,12 +55,13 @@ public class BookServiceImpl implements BookService {
         bookRepository.deleteById(id);
     }
 
-    private Book save(String title, String authorId, String genreId) {
+    private Book save(String id, String title, String authorId, String genreId) {
         var author = authorRepository.findById(authorId)
                 .orElseThrow(() -> new EntityNotFoundException("Author with id %s not found".formatted(authorId)));
         var genre = genreRepository.findById(genreId)
                 .orElseThrow(() -> new EntityNotFoundException("Genre with id %s not found".formatted(genreId)));
-        var book = new Book(title, author, genre);
+        var book = new Book(id, title, author, genre);
+
         return bookRepository.save(book);
     }
 }

@@ -5,27 +5,25 @@ import com.mongodb.DBObject;
 import org.bson.types.ObjectId;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
 import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 import ru.otus.hw.models.Author;
 import ru.otus.hw.models.Book;
 import ru.otus.hw.models.Comment;
 import ru.otus.hw.models.Genre;
+import ru.otus.hw.repositories.CommentRepository;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 
 @DataMongoTest
-@ExtendWith(SpringExtension.class)
 public class CommentRepositoryTest {
     @Autowired
     private MongoTemplate mongoTemplate;
+
+    @Autowired
+    private CommentRepository commentRepository;
 
     private static String authorId;
     private static String genreId;
@@ -52,50 +50,46 @@ public class CommentRepositoryTest {
                 .add("author_id", authorId)
                 .add("genre_id", genreId)
                 .get();
-        bookId = mongoTemplate.save(objectToSaveBook, "book").get("_id").toString();
+        var book = mongoTemplate.save(objectToSaveBook, "book");
+        bookId = book.get("_id").toString();
 
         DBObject objectToSave = BasicDBObjectBuilder.start()
                 .add("_id", ObjectId.get())
                 .add("text", "comment_1")
-                .add("book_id", bookId)
+                .add("book", book)
                 .get();
         commentId = mongoTemplate.save(objectToSave, "comment").get("_id").toString();
     }
 
     @Test
     public void testFindById() {
-        var result = mongoTemplate.findById(commentId, Comment.class);
+        var result = commentRepository.findById(commentId);
         assertNotNull(result);
-        assertEquals("comment_1", result.getText());
-    }
-
-    @Test
-    public void testFindAll() {
-        var result = mongoTemplate.findAll(Comment.class);
-        assertNotNull(result);
-        assertFalse(result.isEmpty());
+        assertTrue(result.isPresent());
+        assertEquals(mongoTemplate.findById(commentId, Comment.class).getText(), result.get().getText());
     }
 
     @Test
     public void testSave() {
-        var resultSave = mongoTemplate.save(new Comment(
+        var resultSave = commentRepository.save(
+                new Comment(
+                        "comment_21",
+                        new Book(bookId, "book_1", new Author(authorId, "author_1"), new Genre(genreId, "genre_1"))
+                )
+        );
+        assertDoesNotThrow(() -> resultSave);
+
+        var res = mongoTemplate.save(new Comment(
                 "comment_21",
                 new Book(bookId, "book_1", new Author(authorId, "author_1"), new Genre(genreId, "genre_1")))
         );
-        assertDoesNotThrow(() -> resultSave);
-        assertEquals("comment_21", resultSave.getText());
-        assertEquals("book_1", resultSave.getBook().getTitle());
+
+        assertEquals(res.getText(), resultSave.getText());
+        assertEquals(res.getBook().getTitle(), resultSave.getBook().getTitle());
     }
 
     @Test
-    public void testDelete() {
-        var result = mongoTemplate.remove(
-                new Comment(
-                        commentId,
-                        "comment_1",
-                        new Book("book_1", new Author(authorId, "author_1"), new Genre(genreId, "genre_1")))
-        );
-        assertDoesNotThrow(() -> result);
-        assertEquals(1, result.getDeletedCount());
+    public void testDeleteById() {
+        assertDoesNotThrow(() -> commentRepository.deleteById(commentId));
     }
 }

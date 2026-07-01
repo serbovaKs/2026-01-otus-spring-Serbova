@@ -5,23 +5,21 @@ import com.mongodb.DBObject;
 import org.bson.types.ObjectId;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
 import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 import ru.otus.hw.models.Author;
+import ru.otus.hw.repositories.AuthorRepository;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.*;
 
 @DataMongoTest
-@ExtendWith(SpringExtension.class)
 class AuthorRepositoryTest {
     @Autowired
     private MongoTemplate mongoTemplate;
+
+    @Autowired
+    private AuthorRepository authorRepository;
 
     private static String id;
 
@@ -37,29 +35,32 @@ class AuthorRepositoryTest {
 
     @Test
     public void testFindById() {
-        var result = mongoTemplate.findById(id, Author.class);
-        assertDoesNotThrow(() -> result);
-        assertEquals("author_1", result.getFullName());
+        var result = authorRepository.findById(id);
+        assertTrue(result.isPresent());
+        assertEquals(result.get().getFullName(), mongoTemplate.findById(id, Author.class).getFullName());
     }
 
     @Test
     public void testFindAll() {
-        var result = mongoTemplate.findAll(Author.class);
+        var result = authorRepository.findAll();
         assertNotNull(result);
         assertFalse(result.isEmpty());
+        assertEquals(
+                mongoTemplate.findAll(Author.class).stream().map(Author::getFullName).toList(),
+                result.stream().map(Author::getFullName).toList()
+        );
     }
 
     @Test
     public void testSave() {
-        var resultSave = mongoTemplate.save(new Author("author_21"));
+        var authorBySave = new Author("author_21");
+        var resultSave = authorRepository.save(authorBySave);
         assertDoesNotThrow(() -> resultSave);
-        assertEquals("author_21", mongoTemplate.findById(resultSave.getId(), Author.class).getFullName());
+        assertEquals("author_21", resultSave.getFullName());
     }
 
     @Test
     public void testDelete() {
-        var result = mongoTemplate.remove(new Author(id, "author_1"), "author");
-        assertDoesNotThrow(() -> result);
-        assertEquals(1, result.getDeletedCount());
+        assertDoesNotThrow(() -> authorRepository.delete(new Author(id, "author_1")));
     }
 }

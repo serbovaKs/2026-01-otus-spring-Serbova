@@ -1,0 +1,95 @@
+package ru.otus.hw.repository;
+
+import com.mongodb.BasicDBObjectBuilder;
+import com.mongodb.DBObject;
+import org.bson.types.ObjectId;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import ru.otus.hw.models.Author;
+import ru.otus.hw.models.Book;
+import ru.otus.hw.models.Comment;
+import ru.otus.hw.models.Genre;
+import ru.otus.hw.repositories.CommentRepository;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+
+@DataMongoTest
+public class CommentRepositoryTest {
+    @Autowired
+    private MongoTemplate mongoTemplate;
+
+    @Autowired
+    private CommentRepository commentRepository;
+
+    private static String authorId;
+    private static String genreId;
+    private static String bookId;
+    private static String commentId;
+
+    @BeforeAll
+    public static void beforeLoadDb(@Autowired MongoTemplate mongoTemplate) {
+        DBObject objectToSaveAuthor = BasicDBObjectBuilder.start()
+                .add("_id", ObjectId.get())
+                .add("fullName", "author_1")
+                .get();
+        authorId = mongoTemplate.save(objectToSaveAuthor, "author").get("_id").toString();
+
+        DBObject objectToSaveGenre = BasicDBObjectBuilder.start()
+                .add("_id", ObjectId.get())
+                .add("name", "genre_1")
+                .get();
+        genreId = mongoTemplate.save(objectToSaveGenre, "genre").get("_id").toString();
+
+        DBObject objectToSaveBook = BasicDBObjectBuilder.start()
+                .add("_id", ObjectId.get())
+                .add("title", "book_1")
+                .add("author_id", authorId)
+                .add("genre_id", genreId)
+                .get();
+        var book = mongoTemplate.save(objectToSaveBook, "book");
+        bookId = book.get("_id").toString();
+
+        DBObject objectToSave = BasicDBObjectBuilder.start()
+                .add("_id", ObjectId.get())
+                .add("text", "comment_1")
+                .add("book", book)
+                .get();
+        commentId = mongoTemplate.save(objectToSave, "comment").get("_id").toString();
+    }
+
+    @Test
+    public void testFindById() {
+        var result = commentRepository.findById(commentId);
+        assertNotNull(result);
+        assertTrue(result.isPresent());
+        assertEquals(mongoTemplate.findById(commentId, Comment.class).getText(), result.get().getText());
+    }
+
+    @Test
+    public void testSave() {
+        var resultSave = commentRepository.save(
+                new Comment(
+                        "comment_21",
+                        new Book(bookId, "book_1", new Author(authorId, "author_1"), new Genre(genreId, "genre_1"))
+                )
+        );
+        assertDoesNotThrow(() -> resultSave);
+
+        var res = mongoTemplate.save(new Comment(
+                "comment_21",
+                new Book(bookId, "book_1", new Author(authorId, "author_1"), new Genre(genreId, "genre_1")))
+        );
+
+        assertEquals(res.getText(), resultSave.getText());
+        assertEquals(res.getBook().getTitle(), resultSave.getBook().getTitle());
+    }
+
+    @Test
+    public void testDeleteById() {
+        assertDoesNotThrow(() -> commentRepository.deleteById(commentId));
+    }
+}
